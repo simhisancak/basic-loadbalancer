@@ -7,7 +7,7 @@ from threading import Thread
 HOST = "0.0.0.0"
 HOST_PORT = 8080
 
-BUFFER_SIZE = 32767
+BUFFER_SIZE = 1000000
 
 SERVERS = [
     {
@@ -79,12 +79,8 @@ def proxy(c:socket.socket, ip, port):
         bc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
         try:
             bc.connect(backend)
-            
-            bc.sendall(c.recv(BUFFER_SIZE))
-            c.sendall(bc.recv(BUFFER_SIZE))
-            
-            bc.close()
-            c.close()
+            Thread(target=soc_communication, args=(bc,c)).start()
+            Thread(target=soc_communication, args=(c,bc)).start()
             log_writer(f"Porixed {ip}:{port} to {backend[0]}:{backend[1]}")
             break
         except ConnectionRefusedError:
@@ -95,6 +91,9 @@ def proxy(c:socket.socket, ip, port):
             log_writer(f"Connection failed. Error :  {str(sys.exc_info())}")
             pass
 
+
+def soc_communication(a:socket.socket, b:socket.socket):
+    a.sendall(b.recv(BUFFER_SIZE))    
 
 def chooseBackend():
     global LOAD_COUNTER
