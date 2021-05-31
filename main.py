@@ -7,6 +7,8 @@ from threading import Thread
 HOST = "0.0.0.0"
 HOST_PORT = 8080
 
+BUFFER_SIZE = 32767
+
 SERVERS = [
     {
         "ip" : "0.0.0.0",
@@ -27,6 +29,7 @@ SERVERS = [
 ]
 
 LOAD_COUNTER = 0
+
 
 def convert(seconds,gmt):
     seconds = seconds % (24 * 3600)
@@ -77,8 +80,8 @@ def proxy(c:socket.socket, ip, port):
         try:
             bc.connect(backend)
             
-            bc.sendall(c.recv(1000000))
-            c.sendall(bc.recv(1000000))
+            bc.sendall(c.recv(BUFFER_SIZE))
+            c.sendall(bc.recv(BUFFER_SIZE))
             
             bc.close()
             c.close()
