@@ -77,6 +77,7 @@ def proxy(c:socket.socket, ip, port):
     backend = chooseBackend()
     while True:
         bc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        bc.settimeout(10)
         try:
             bc.connect(backend)
             Thread(target=soc_communication, args=(bc,c)).start()
@@ -93,8 +94,12 @@ def proxy(c:socket.socket, ip, port):
 
 
 def soc_communication(a:socket.socket, b:socket.socket):
-    a.sendall(b.recv(BUFFER_SIZE))    
+    while True:
+        data = b.recv(BUFFER_SIZE)
+        if not data: break
+        a.sendall(data)   
 
+    
 def chooseBackend():
     global LOAD_COUNTER
     ret = (SERVERS[LOAD_COUNTER]["ip"], SERVERS[LOAD_COUNTER]["port"])
