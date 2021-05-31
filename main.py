@@ -95,9 +95,12 @@ def proxy(c:socket.socket, ip, port):
 
 def soc_communication(a:socket.socket, b:socket.socket):
     while True:
-        data = b.recv(BUFFER_SIZE)
-        if not data: break
-        a.sendall(data)   
+        try:
+            data = b.recv(BUFFER_SIZE)
+            if not data: break
+            a.sendall(data)   
+        except socket.timeout:
+            break
 
     
 def chooseBackend():
